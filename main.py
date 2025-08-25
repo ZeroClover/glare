@@ -1,8 +1,10 @@
-from flask import Flask, jsonify, redirect
-import requests
-import semver
+import os
 import re
 from typing import Optional, Dict, Any, List
+
+import requests
+import semver
+from flask import Flask, jsonify, redirect
 
 app = Flask(__name__)
 
@@ -65,10 +67,19 @@ def get_release(user, repo_ver, name_re):
     return redirect(matched[0])
 
 def api_req(url):
-    resp = requests.get(url)
+    try:
+        resp = requests.get(url, headers=_gh_headers(), timeout=10)
+    except requests.RequestException as e:
+        return None, (jsonify(message="network error contacting GitHub API", error=str(e)), 502)
     if resp.status_code != 200:
-        return None, (jsonify(message="error from GitHub API",
-                              github_api_msg=resp.json()), resp.status_code)
+        try:
+            payload = resp.json()
+        except ValueError:
+            payload = {"text": resp.text[:500]}
+        return None, (
+            jsonify(message="error from GitHub API", github_api_msg=payload, status=resp.status_code),
+            resp.status_code,
+        )
     return resp.json(), None
 
 
@@ -86,3 +97,14 @@ def latest_prerelease(releases: List[Dict[str, Any]]) -> Optional[Dict[str, Any]
 
     candidates.sort(key=ts, reverse=True)
     return candidates[0]
+
+
+def _gh_headers() -> Dict[str, str]:
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "glare/modernized (+https://github.com/Contextualist/glare)",
+    }
+    token = os.getenv("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers

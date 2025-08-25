@@ -37,4 +37,9 @@ If `{tag}` is given, Glare looks for a release with exact matching tag. For `{se
 
 For `@Pre-release`, Glare selects the newest published pre-release (non-draft) and applies the same filename matching.
 
+## Notes on Runtime & Auth
+- Runtime: Python 3.12 (see `runtime.txt`).
+- Dependencies updated to modern versions (Flask 3, Requests 2.31+).
+- To reduce GitHub API rate limiting, you can set `GITHUB_TOKEN` in your environment; the service will forward it via the `Authorization` header.
+
 Tip: to check if a request leads to the desired redirection, `curl` it without any option.

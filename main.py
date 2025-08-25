@@ -3,7 +3,7 @@ import re
 from typing import Optional, Dict, Any, List
 
 import requests
-import semver
+from semantic_version import Version, NpmSpec
 from flask import Flask, jsonify, redirect
 
 app = Flask(__name__)
@@ -39,12 +39,13 @@ def get_release(user, repo_ver, name_re):
                 tag = f"tags/{ver}"
             else:
                 try:
-                    v = semver.max_satisfying(all_tags, ver)
-                except Exception as e:
+                    spec = NpmSpec(ver)
+                except ValueError as e:
                     return jsonify(message=f"error matching the tag: {e}"), 400
-                if v is None:
+                chosen = max_satisfying(all_tags, spec)
+                if chosen is None:
                     return jsonify(message="no tag matched"), 404
-                tag = f"tags/{v}"
+                tag = f"tags/{chosen}"
     else:
         tag = "latest"
 
@@ -108,3 +109,22 @@ def _gh_headers() -> Dict[str, str]:
     if token:
         headers["Authorization"] = f"Bearer {token}"
     return headers
+
+
+def max_satisfying(tags: List[str], spec: NpmSpec) -> Optional[str]:
+    """Return the original tag string of the highest version satisfying the NpmSpec.
+    Strips a leading 'v' when parsing. Skips tags that are not valid semver.
+    """
+    best: Optional[Version] = None
+    best_tag: Optional[str] = None
+    for t in tags:
+        s = t.lstrip('v')
+        try:
+            v = Version(s)
+        except ValueError:
+            continue
+        if spec.match(v):
+            if best is None or v > best:
+                best = v
+                best_tag = t
+    return best_tag

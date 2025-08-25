@@ -27,9 +27,14 @@ Sometimes when I'm writing a Dockerfile, I need to install packages from their G
 
 # To get a specific version or pick within a version range...
 /{owner}/{repo}@{tag|semver}/{file_name_regex}
+
+# To get the latest pre-release...
+/{owner}/{repo}@Pre-release/{file_name_regex}
 ```
 `{file_name_regex}` is a regular expression to match the file (or specially, it can be `tar` or `zip` standing for the source code download in the respective format). It should match at least one file among the latest release files, otherwise Glare will throw an error. If multiple files are matched, Glare returns the one with shortest length.
 
 If `{tag}` is given, Glare looks for a release with exact matching tag. For `{semver}` provided, Glare treats it as a [npm-flavor semver](https://semver.npmjs.com/) and matches all release tag names against it. The highest of all satisfied versions is chosen.
+
+For `@Pre-release`, Glare selects the newest published pre-release (non-draft) and applies the same filename matching.
 
 Tip: to check if a request leads to the desired redirection, `curl` it without any option.

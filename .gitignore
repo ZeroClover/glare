@@ -1,1 +1,49 @@
 .vercel
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.Python
+python_env/
+
+# Unit test / coverage reports
+.coverage*
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Type checker / linter caches
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+
+# Logs
+*.log
+logs/
+
+# IDE / editor settings
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+
+# Environment variables
+.env
+.env.*
